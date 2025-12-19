@@ -1,96 +1,117 @@
 # DM-Viginere 
-// * File: vigenere_alt.cpp
-// * Purpose: Vigenère Cipher Encryption & Decryption (Alternative Design)
-// * Notes: Uses std::string and functions instead of C-style arrays
-
-
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <cctype>
 
 using namespace std;
 
-// Function to generate repeating key
-string generateKey(const string& text, const string& key) {
+bool lettersOnly(const string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!isalpha(static_cast<unsigned char>(c))) return false;
+    }
+    return true;
+}
+
+string toUpperCopy(string s) {
+    transform(s.begin(), s.end(), s.begin(),
+              [](unsigned char ch) { return static_cast<char>(toupper(ch)); });
+    return s;
+}
+
+string expandKey(const string& text, const string& key) {
     string fullKey;
-    for (size_t i = 0; i < text.length(); i++) {
-        fullKey += key[i % key.length()];
+    fullKey.reserve(text.size());
+    for (size_t i = 0; i < text.size(); ++i) {
+        fullKey.push_back(key[i % key.size()]);
     }
     return fullKey;
 }
 
-// Encrypt function
-string encryptVigenere(const string& text, const string& key) {
-    string cipher;
-    for (size_t i = 0; i < text.length(); i++) {
-        char encryptedChar = (text[i] - 'A' + key[i] - 'A') % 26 + 'A';
-        cipher += encryptedChar;
+string vigenereEncrypt(const string& plain, const string& fullKey) {
+    string out;
+    out.reserve(plain.size());
+    for (size_t i = 0; i < plain.size(); ++i) {
+        char enc = static_cast<char>(((plain[i] - 'A') + (fullKey[i] - 'A')) % 26 + 'A');
+        out.push_back(enc);
     }
-    return cipher;
+    return out;
 }
 
-// Decrypt function
-string decryptVigenere(const string& text, const string& key) {
-    string plain;
-    for (size_t i = 0; i < text.length(); i++) {
-        char decryptedChar = (text[i] - key[i] + 26) % 26 + 'A';
-        plain += decryptedChar;
+string vigenereDecrypt(const string& cipher, const string& fullKey) {
+    string out;
+    out.reserve(cipher.size());
+    for (size_t i = 0; i < cipher.size(); ++i) {
+        char dec = static_cast<char>(((cipher[i] - 'A') - (fullKey[i] - 'A') + 26) % 26 + 'A');
+        out.push_back(dec);
     }
-    return plain;
+    return out;
 }
 
 int main() {
     string message, key;
-    int option;
-    ofstream logFile;
+    int choice = 0;
 
-    cout << "Enter a message (letters only, no spaces): ";
+cout << "Enter message (letters only, no spaces): ";
     cin >> message;
 
-    cout << "Enter encryption key: ";
+cout << "Enter key (letters only): ";
     cin >> key;
 
-    // Convert both to uppercase
-    transform(message.begin(), message.end(), message.begin(), ::toupper);
-    transform(key.begin(), key.end(), key.begin(), ::toupper);
-
-    string expandedKey = generateKey(message, key);
-
-    cout << "Choose an option:\n";
-    cout << "1 - Encrypt\n";
-    cout << "2 - Decrypt\n";
-    cout << "Selection: ";
-    cin >> option;
-
-    logFile.open("vigenere_log.txt", ios::app);
-
-    if (option == 1) {
-        string encrypted = encryptVigenere(message, expandedKey);
-        cout << "\nEncrypted Message: " << encrypted << endl;
-
-        logFile << "\n--- ENCRYPTION ---";
-        logFile << "\nMessage: " << message;
-        logFile << "\nKey: " << key;
-        logFile << "\nExpanded Key: " << expandedKey;
-        logFile << "\nEncrypted: " << encrypted << endl;
+ if (!lettersOnly(message) || !lettersOnly(key)) {
+        cout << "\nError: Message and key must contain letters only (A-Z).\n";
+        return 0;
     }
-    else if (option == 2) {
-        string decrypted = decryptVigenere(message, expandedKey);
-        cout << "\nDecrypted Message: " << decrypted << endl;
 
-        logFile << "\n--- DECRYPTION ---";
-        logFile << "\nCipher Text: " << message;
-        logFile << "\nKey: " << key;
-        logFile << "\nExpanded Key: " << expandedKey;
-        logFile << "\nDecrypted: " << decrypted << endl;
+  message = toUpperCopy(message);
+    key = toUpperCopy(key);
+
+ cout << "\nChoose:\n";
+    cout << "1) Encrypt\n";
+    cout << "2) Decrypt\n";
+    cout << "Selection: ";
+    cin >> choice;
+
+ ofstream log("vigenere_log.txt", ios::app);
+
+ if (choice == 1) {
+        string encrypted = vigenereEncrypt(message, fullKey);
+
+ cout << "\nOriginal : " << message;
+        cout << "\nKey      : " << key;
+        cout << "\nFull Key : " << fullKey;
+        cout << "\nEncrypted: " << encrypted << "\n";
+
+ log << "\n=== ENCRYPT ===\n";
+        log << "Original : " << message << "\n";
+        log << "Key      : " << key << "\n";
+        log << "Full Key : " << fullKey << "\n";
+        log << "Encrypted: " << encrypted << "\n";
+        log << "-----------------------------\n";
+    }
+    else if (choice == 2) {
+        string decrypted = vigenereDecrypt(message, fullKey);
+
+cout << "\nCipher   : " << message;
+        cout << "\nKey      : " << key;
+        cout << "\nFull Key : " << fullKey;
+        cout << "\nDecrypted: " << decrypted << "\n";
+
+ log << "\n=== DECRYPT ===\n";
+        log << "Cipher   : " << message << "\n";
+        log << "Key      : " << key << "\n";
+        log << "Full Key : " << fullKey << "\n";
+        log << "Decrypted: " << decrypted << "\n";
+        log << "-----------------------------\n";
     }
     else {
-        cout << "Invalid option selected." << endl;
+        cout << "\nInvalid selection.\n";
+        log << "\nInvalid selection entered.\n";
+        log << "-----------------------------\n";
     }
 
-    logFile << "--------------------------\n";
-    logFile.close();
-
+ log.close();
     return 0;
 }
