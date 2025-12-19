@@ -1,117 +1,36 @@
-# DM-Viginere 
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <fstream>
-#include <cctype>
+Vigenère Cipher – C++ Encryption & Decryption
 
-using namespace std;
+Project Description
+In this Project, we implement the "Vigenere Cipher", which is a classical technique used to securely encode and decode text messages. It is made to allow a user to input a message and an encryption key, then to choose whether to encrypt or decrypt a text message or messages. The purpose of this project is to demonstrate fundamental cryptography concepts while applying discrete structures and algorithmic logic using C++. 
 
-bool lettersOnly(const string& s) {
-    if (s.empty()) return false;
-    for (char c : s) {
-        if (!isalpha(static_cast<unsigned char>(c))) return false;
-    }
-    return true;
-}
+The program is designed for educational use and helps users understand how repeating keys and modular arithmetic are used in substitution-based encryption systems.
 
-string toUpperCopy(string s) {
-    transform(s.begin(), s.end(), s.begin(),
-              [](unsigned char ch) { return static_cast<char>(toupper(ch)); });
-    return s;
-}
+Programming Approach
+- We write this program in C++ using modern features such as std::string.
+- Functions are used to separate logic for:
+  - Key expansion
+  - Encryption
+  - Decryption
+  - Input validation
+- All characters are converted to uppercase to ensure consistent encryption.
+- Then, modular arithmetic mod 26 is used to keep characters within the alphabet range.
+- The program then uses loops and conditionals to process user input and control program flow for the functionality of the program.
+- Encryption and decryption results are logged to a text file for record keeping.
 
-string expandKey(const string& text, const string& key) {
-    string fullKey;
-    fullKey.reserve(text.size());
-    for (size_t i = 0; i < text.size(); ++i) {
-        fullKey.push_back(key[i % key.size()]);
-    }
-    return fullKey;
-}
+---
 
-string vigenereEncrypt(const string& plain, const string& fullKey) {
-    string out;
-    out.reserve(plain.size());
-    for (size_t i = 0; i < plain.size(); ++i) {
-        char enc = static_cast<char>(((plain[i] - 'A') + (fullKey[i] - 'A')) % 26 + 'A');
-        out.push_back(enc);
-    }
-    return out;
-}
+Authors
+- Daniel Meseha
 
-string vigenereDecrypt(const string& cipher, const string& fullKey) {
-    string out;
-    out.reserve(cipher.size());
-    for (size_t i = 0; i < cipher.size(); ++i) {
-        char dec = static_cast<char>(((cipher[i] - 'A') - (fullKey[i] - 'A') + 26) % 26 + 'A');
-        out.push_back(dec);
-    }
-    return out;
-}
+Date Published
+- 12/18/25
 
-int main() {
-    string message, key;
-    int choice = 0;
-
-cout << "Enter message (letters only, no spaces): ";
-    cin >> message;
-
-cout << "Enter key (letters only): ";
-    cin >> key;
-
- if (!lettersOnly(message) || !lettersOnly(key)) {
-        cout << "\nError: Message and key must contain letters only (A-Z).\n";
-        return 0;
-    }
-
-  message = toUpperCopy(message);
-    key = toUpperCopy(key);
-
- cout << "\nChoose:\n";
-    cout << "1) Encrypt\n";
-    cout << "2) Decrypt\n";
-    cout << "Selection: ";
-    cin >> choice;
-
- ofstream log("vigenere_log.txt", ios::app);
-
- if (choice == 1) {
-        string encrypted = vigenereEncrypt(message, fullKey);
-
- cout << "\nOriginal : " << message;
-        cout << "\nKey      : " << key;
-        cout << "\nFull Key : " << fullKey;
-        cout << "\nEncrypted: " << encrypted << "\n";
-
- log << "\n=== ENCRYPT ===\n";
-        log << "Original : " << message << "\n";
-        log << "Key      : " << key << "\n";
-        log << "Full Key : " << fullKey << "\n";
-        log << "Encrypted: " << encrypted << "\n";
-        log << "-----------------------------\n";
-    }
-    else if (choice == 2) {
-        string decrypted = vigenereDecrypt(message, fullKey);
-
-cout << "\nCipher   : " << message;
-        cout << "\nKey      : " << key;
-        cout << "\nFull Key : " << fullKey;
-        cout << "\nDecrypted: " << decrypted << "\n";
-
- log << "\n=== DECRYPT ===\n";
-        log << "Cipher   : " << message << "\n";
-        log << "Key      : " << key << "\n";
-        log << "Full Key : " << fullKey << "\n";
-        log << "Decrypted: " << decrypted << "\n";
-        log << "-----------------------------\n";
-    }
-    else {
-        cout << "\nInvalid selection.\n";
-        log << "\nInvalid selection entered.\n";
-        log << "-----------------------------\n";
-    }
-
- log.close();
-    return 0;
-}
+How to Use the Program
+1. Run the program.
+2. Enter a message containing letters only.
+3. Enter an encryption key containing letters only.
+4. Then choose one of the following options:
+   - `1` to encrypt the message
+   - `2` to decrypt the message
+5. The result will end up being displayed on the screen.
+6. A log of the operation will be saved to `vigenere_log.txt`.
